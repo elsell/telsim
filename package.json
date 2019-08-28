@@ -4,7 +4,7 @@
   "description": "A simulated implementation of the DJI Tello quad-copter API",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "electron ."
   },
   "repository": {
     "type": "git",
@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/elsell/telsim#readme",
   "devDependencies": {
-    "electron": "^6.0.5"
+    "electron": "^6.0.5",
+    "ws": "^7.1.2"
   }
 }
