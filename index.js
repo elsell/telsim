@@ -15,11 +15,8 @@ wss.on('connection', ws => {
 
         // Send recieved message to the renderer window
         window.webContents.send(COMMAND_KEY, String(message));
-    })
-   // ws.send("recieved");
-  
+    }) 
 });
-
 
 // Recieve Response from Renderer to Send to Client
 ipcMain.on('synchronous-message', (event, arg) => {
@@ -46,12 +43,10 @@ function CreateWindow ()
     // and load renderer webpage
     window.loadFile("renderer/index.html");
 
-
     window.webContents.on('crashed', (e) => {
         Log(e);
         app.quit()
     });
-
 }
 
 function Log(message)
@@ -64,7 +59,7 @@ function Log(message)
 
 app.on('ready', CreateWindow);
 
-app.on('before-quit', () => {
+app.on('quit', () => {
     Log("Cleaning Up...");
     wss.close();
     app.quit()
