@@ -2,7 +2,7 @@ class TelloTranslate
 {
     constructor()
     {}
-    
+
     static commandMap = 
     {
         "land":{  
@@ -89,7 +89,7 @@ class TelloTranslate
     // Given a Telsim API command, will return the corresponding Javascript 
     // function and an array of arguments to be passed to the function.
     // Ex:
-    // Translate("speed 10") -> {"function": c_Speed, "argv": [10]}
+    // Translate("speed 10") -> {"func": c_Speed, "argv": [10]}
     static Translate(command)
     {
         if(typeof command !== "string")
@@ -119,7 +119,7 @@ class TelloTranslate
 
         var rtnObj = 
         {
-            "function": commandData.function,
+            "func": commandData.function,
             "argv": commandBuff.slice(1)
         };
 
