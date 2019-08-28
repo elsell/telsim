@@ -1,6 +1,7 @@
 var ipcRenderer   = require('electron').ipcRenderer;
 const COMMAND_KEY = "quad-command";
 
+// Recieve Command
 ipcRenderer.on(COMMAND_KEY, (e, command) =>
 {
     console.log(command);
