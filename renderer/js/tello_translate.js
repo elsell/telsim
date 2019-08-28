@@ -105,6 +105,11 @@ class TelloTranslate
 
         var commandData = TelloTranslate.commandMap[rootCommand];
 
+        if(!commandData)
+        {
+            throw("Invalid Command: '" + command + "'");
+        }
+
         // We will only check if there are not enough arguments provided for 
         // the desired command. We will not check if we are given too many.
         // If there are more arguments provided than neccessary, we will use the
@@ -112,7 +117,8 @@ class TelloTranslate
         if(commandBuff.length < commandData.argc + 1)
         {
             throw(
-                "Invalid Command: '" + command + "' (Argument Count Mismatch," +
+                "Invalid Command Structure: '" + command + 
+                "' (Argument Count Mismatch," +
                 " Expecting " + String(commandData.argc) + " arguments)"
             );
         }
