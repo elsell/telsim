@@ -62,7 +62,9 @@ class TelloTranslate
              "go":{  
                 "function":c_Go,
                 "argc":4,
-                "desc":"Rotate 'x' degrees counterclockwise. x = [1,360]"
+                "desc":"Fly to 'x' 'y' 'z' at 'speed' (cm/s). " +
+                "'x' = [-500,500] 'y' = [-500,500] 'z' = [-500,500] " + 
+                "'speed' = [10,100]"
              },
              "stop":{  
                 "function":c_Stop,
@@ -83,8 +85,42 @@ class TelloTranslate
         };
     }
 
-    get Translate(command)
+    // Given a Telsim API command, will return the corresponding Javascript 
+    // function and an array of arguments to be passed to the function.
+    // Ex:
+    // Translate("speed 10") -> {"function": c_Speed, "argv": [10]}
+    Translate(command)
     {
-        return self.commandMap[command];
+        if(typeof command !== "string")
+        {
+            throw("Execute must be passed a String");
+        }
+
+        // Split the command on whitespace so that
+        // we can work with multiple parameters
+        var commandBuff = command.split(" ");
+        
+        var rootCommand = commandBuff[0];
+
+        var commandData = self.commandMap[rootCommand];
+
+        // We will only check if there are not enough arguments provided for 
+        // the desired command. We will not check if we are given too many.
+        // If there are more arguments provided than neccessary, we will use the
+        // first n arguments where n is the expected number of arguments. 
+        if(commandBuff.length < commandData.argc + 1)
+        {
+            throw(
+                "Invalid Command: '" + command + "' (Argument Count Mismatch)"
+            );
+        }
+
+        var rtnObj = 
+        {
+            "function": commandData.function,
+            "argv": commandBuff.slice(1)
+        };
+
+        return rtnObj;
     }
 };
