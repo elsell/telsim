@@ -1,0 +1,22 @@
+{
+  "name": "telsim",
+  "version": "0.0.1",
+  "description": "A simulated implementation of the DJI Tello quad-copter API",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elsell/telsim.git"
+  },
+  "author": "elsell",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/elsell/telsim/issues"
+  },
+  "homepage": "https://github.com/elsell/telsim#readme",
+  "devDependencies": {
+    "electron": "^6.0.5"
+  }
+}
