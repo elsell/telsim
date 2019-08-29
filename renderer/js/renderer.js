@@ -1,9 +1,10 @@
 let SHOW_FPS = true;
 let COPTER_POS = { x: 0, y: 0, z: 0 };
-let COPTER_SCALE = .07;
+let COPTER_DEST = { x: 0, y: 0, z: 0 };
+
+let COPTER_SCALE = .068;
 let COPTER_MODEL_SCALE = .321;
 let COPTER_SPEED = 1;
-let COPTER_DEST = { x: 3, y: -3, z: 5 };
 
 // How many pixels represent 1 foot
 let ONE_FOOT = 20;
@@ -104,9 +105,6 @@ function InterpolatePosition()
     COPTER_POS.x += direction.x;
     COPTER_POS.y += direction.y;
     COPTER_POS.z += direction.z;
-
-
-
 }
 
 function drawFloor()
@@ -156,9 +154,6 @@ function draw()
     drawFps();
 
     drawFloor();
-
-    // rotateX(frameCount * 0.01);
-    // rotateY(frameCount * 0.01);
 
     InterpolatePosition();
 
