@@ -7,6 +7,16 @@ function GetCallingFuncName()
    return funName;
 }
 
+function CentemeterToFoot(centemeters)
+{
+    return centemeters / 30.48;
+}
+
+function FootToCentemeter(feet)
+{
+    return feet * 30.48;
+}
+
 function c_Land()
 { console.log("Executing: " + arguments.callee.name) 
     
