@@ -2,6 +2,7 @@
     <head>
         <!-- p5.js -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/p5.js"></script>
+        <script src="js/p5.dom.js"></script>
         <script src="js/renderer.js"></script>
 
         <!-- Project Files -->
@@ -11,8 +12,25 @@
 
         <!-- Style -->
         <link type="text/css" rel="stylesheet" href="style/main.css">
+        <link type="text/css" rel="stylesheet" href="style/control-surface.css">
 
     </head>
     <body>
+
+        <!-- Control Surface -->
+        <div id="control-surface">
+            <div id="left-section" class="control-section">
+                FPS
+            </div>
+            <div id="middle-section" class="control-section">
+                <div class="button red"><p>RESET</p></div>
+            </div>
+            <div id="right-section" class="control-section">
+                <div class="button"><p>TOP</p></div>
+                <div class="button"><p>SIDE</p></div>
+                <div class="button"><p>CORNER</p></div>
+            </div>
+        </div>
+        <!-- /Control Surface -->
     </body>
 </html>
