@@ -2,16 +2,16 @@ $(document).ready(()=>
 {
     $("#top").on("click", ()=>
     {
-        CAMERA_POS = VIEWS.topView;
+        CAMERA_DEST = VIEWS.topView;
     });
 
     $("#side").on("click", ()=>
     {
-        CAMERA_POS = VIEWS.sideView;
+        CAMERA_DEST = VIEWS.sideView;
     });
 
     $("#corner").on("click", ()=>
     {
-        CAMERA_POS = VIEWS.cornerView;
+        CAMERA_DEST = VIEWS.cornerView;
     });
 });

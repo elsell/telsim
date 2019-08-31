@@ -1,4 +1,6 @@
 let SHOW_FPS = true;
+let SHOW_GROUND_MARKER = true;
+
 let COPTER_POS = { x: 0, y: 0, z: 0 };
 let COPTER_DEST = { x: 0, y: 0, z: 0 };
 
@@ -8,6 +10,8 @@ let COPTER_SPEED = 1;
 
 let CAMERA_POS = { x:0, y: 0, z: 1000 };
 let CAMERA_FOCUS = { x:0, y: 0, z: 0 };
+let CAMERA_DEST = CAMERA_POS;
+let CAMERA_SPEED = 1250;
 
 let VIEWS = 
 {
@@ -72,12 +76,23 @@ function drawFps()
 function drawCopter()
 {
     push();
+
     translate
     (
         COPTER_POS.x * ONE_FOOT,
         COPTER_POS.y * ONE_FOOT,
         COPTER_POS.z * ONE_FOOT
     );
+
+    if(SHOW_GROUND_MARKER)
+    {
+        push();
+        fill("red");
+        translate(0, 0, COPTER_POS.z  * -ONE_FOOT);
+        box(10,10,1);
+        pop();
+    }
+
 
 
     scale(COPTER_SCALE * (1/65) * ONE_FOOT);
@@ -133,21 +148,21 @@ function DrawAxis()
     pop();
 }
 
-
-function InterpolatePosition()
+// Increments curPos according to the speed provided
+function InterpolatePosition(curPos, destPos, speed)
 {
     var fps = frameRate();
 
-    var distanceToTravel = 1 / fps * COPTER_SPEED;
+    var distanceToTravel = 1 / fps * speed;
 
     if
     (
-        COPTER_POS.x > COPTER_DEST.x - distanceToTravel &&
-        COPTER_POS.x < COPTER_DEST.x + distanceToTravel &&
-        COPTER_POS.y > COPTER_DEST.y - distanceToTravel &&
-        COPTER_POS.y < COPTER_DEST.y + distanceToTravel &&
-        COPTER_POS.z > COPTER_DEST.z - distanceToTravel &&
-        COPTER_POS.z < COPTER_DEST.z + distanceToTravel 
+        curPos.x > destPos.x - distanceToTravel &&
+        curPos.x < destPos.x + distanceToTravel &&
+        curPos.y > destPos.y - distanceToTravel &&
+        curPos.y < destPos.y + distanceToTravel &&
+        curPos.z > destPos.z - distanceToTravel &&
+        curPos.z < destPos.z + distanceToTravel 
     )
     {
         return; 
@@ -155,18 +170,18 @@ function InterpolatePosition()
 
     var direction = createVector
     (
-        COPTER_DEST.x - COPTER_POS.x,
-        COPTER_DEST.y - COPTER_POS.y,
-        COPTER_DEST.z - COPTER_POS.z
+        destPos.x - curPos.x,
+        destPos.y - curPos.y,
+        destPos.z - curPos.z
     );
 
     direction.normalize();
 
     direction.mult(distanceToTravel);
 
-    COPTER_POS.x += direction.x;
-    COPTER_POS.y += direction.y;
-    COPTER_POS.z += direction.z;
+    curPos.x += direction.x;
+    curPos.y += direction.y;
+    curPos.z += direction.z;
 }
 
 function drawFloor()
@@ -218,6 +233,8 @@ function UpdateCamera()
 // Called every frame
 function draw()
 {
+    InterpolatePosition(CAMERA_POS, CAMERA_DEST, CAMERA_SPEED);
+
     UpdateCamera();
 
     background("#AFAFAF");
@@ -228,7 +245,7 @@ function draw()
 
     drawFloor();
 
-    InterpolatePosition();
+    InterpolatePosition(COPTER_POS, COPTER_DEST, COPTER_SPEED);
 
     drawCopter();
 }
