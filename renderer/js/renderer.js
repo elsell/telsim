@@ -9,6 +9,13 @@ let COPTER_SPEED = 1;
 let CAMERA_POS = { x:0, y: 0, z: 1000 };
 let CAMERA_FOCUS = { x:0, y: 0, z: 0 };
 
+let VIEWS = 
+{
+    topView:    { x:0, y: 0, z: 1000 },
+    sideView:   { x:0, y: 1000, z: 1000 },
+    cornerView: { x:1000, y: 200, z: 1000 }
+};
+
 // How many pixels represent 1 foot
 let ONE_FOOT = 20;
 
@@ -16,18 +23,22 @@ let ONE_FOOT = 20;
 let FLOOR_SIZE = 11;
 
 let COPTER_MODEL;
+let FONT; 
 
 function preload()
 {
     COPTER_MODEL = loadModel('assets/copter.stl');
+    FONT = loadFont('assets/incosolata.ttf');
 }
 
 // Runs once
 function setup()
 {
     createCanvas(windowWidth, windowHeight, WEBGL);
-    textSize(width / 3);
-    textAlign(CENTER, CENTER);
+    textSize(20);
+    textAlign(TOP, LEFT);
+
+    textFont(FONT);
     
     windowResized();
 }
@@ -46,17 +57,15 @@ function windowResized()
     resizeCanvas(windowWidth, windowHeight);
 }
 
-// TODO: Load font to display FPS
 function drawFps()
 {
     if(SHOW_FPS)
     {
-        push();
-        let fps = frameRate();
-        fill(255);
-        stroke(0);
-        text("FPS: " + fps.toFixed(2), 0,0);
-        pop();
+        if(frameCount % 15 == 0)
+        {
+            let fps = frameRate();
+            $("#fps").text("FPS: " + fps.toFixed(0));
+        }
     }
 }
 
@@ -76,9 +85,52 @@ function drawCopter()
     pop();
 }
 
-function SideView()
+function DrawAxis()
 {
-    console.warn("Foo");
+    var coneRadius = ONE_FOOT * .1;
+    var coneLength = ONE_FOOT * .5;
+    
+    push();
+    translate
+    (   
+        FLOOR_SIZE * ONE_FOOT * -.5 - ONE_FOOT,
+        FLOOR_SIZE * ONE_FOOT * .5 - ONE_FOOT,
+        0
+    );
+
+    strokeWeight(0);
+    
+    // Y (north)
+    push();
+    rotateZ(PI);
+    fill("green");
+    cone(coneRadius, coneLength);
+    translate(0, -coneLength, 0);
+    cylinder(coneRadius * .1, coneLength)
+    pop();
+
+    // X (east)
+    push();
+    translate(coneLength * 1.5, coneLength * 1.5, 0);
+    rotateZ(-PI * .5);
+    fill("red");
+    cone(coneRadius, coneLength);
+    translate(0, -coneLength, 0);
+    cylinder(coneRadius * .1, coneLength)
+    pop();
+
+    // Z (up)
+    push();
+    translate(0, coneLength * 1.5, coneLength * 1.5);
+    rotateZ(-PI * .5);
+    rotateX(PI * .5);
+    fill("blue");
+    cone(coneRadius, coneLength);
+    translate(0, -coneLength, 0);
+    cylinder(coneRadius * .1, coneLength)
+    pop();
+
+    pop();
 }
 
 
@@ -171,6 +223,8 @@ function draw()
     background("#AFAFAF");
 
     drawFps();
+
+    DrawAxis();
 
     drawFloor();
 
