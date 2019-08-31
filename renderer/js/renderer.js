@@ -16,7 +16,7 @@ let CAMERA_SPEED = 1250;
 let VIEWS = 
 {
     topView:    { x:0, y: 0, z: 1000 },
-    sideView:   { x:0, y: 1000, z: 1000 },
+    sideView:   { x:0, y: 1100, z: 350 },
     cornerView: { x:1000, y: 200, z: 1000 }
 };
 
@@ -88,6 +88,7 @@ function drawCopter()
     {
         push();
         fill("red");
+        strokeWeight(0);
         translate(0, 0, COPTER_POS.z  * -ONE_FOOT);
         box(10,10,1);
         pop();
@@ -100,7 +101,7 @@ function drawCopter()
     pop();
 }
 
-function DrawAxis()
+function DrawAxes()
 {
     var coneRadius = ONE_FOOT * .1;
     var coneLength = ONE_FOOT * .5;
@@ -108,8 +109,8 @@ function DrawAxis()
     push();
     translate
     (   
-        FLOOR_SIZE * ONE_FOOT * -.5 - ONE_FOOT,
-        FLOOR_SIZE * ONE_FOOT * .5 - ONE_FOOT,
+        FLOOR_SIZE * ONE_FOOT * -.5,
+        FLOOR_SIZE * ONE_FOOT * .5 - ONE_FOOT * .75,
         0
     );
 
@@ -241,7 +242,7 @@ function draw()
 
     drawFps();
 
-    DrawAxis();
+    DrawAxes();
 
     drawFloor();
 
