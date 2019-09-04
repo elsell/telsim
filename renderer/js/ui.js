@@ -14,4 +14,9 @@ $(document).ready(()=>
     {
         CAMERA_DEST = VIEWS.cornerView;
     });
+
+    $("#reset").on("click", ()=>
+    {
+        COPTER_DEST = { x: 0, y: 0, z: 0 }; 
+    });
 });

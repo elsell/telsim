@@ -81,7 +81,7 @@ function drawCopter()
     (
         COPTER_POS.x * ONE_FOOT,
         COPTER_POS.y * ONE_FOOT,
-        COPTER_POS.z * ONE_FOOT
+        COPTER_POS.z * ONE_FOOT + 1
     );
 
     if(SHOW_GROUND_MARKER)
@@ -191,7 +191,7 @@ function drawFloor()
     strokeWeight(0);
 
     push();
-    translate(0,0,1);
+    translate(0,0,.1);
     rectMode(RADIUS); 
     fill("#FF0000"); 
     rect(0, 0, ONE_FOOT * .5, .5 * ONE_FOOT);
@@ -231,9 +231,18 @@ function UpdateCamera()
         0, 1, 0);
 }
 
+function SetLighting()
+{
+    ambientLight(255);
+    ambientMaterial(255);
+
+}
+
 // Called every frame
 function draw()
 {
+    SetLighting();
+
     InterpolatePosition(CAMERA_POS, CAMERA_DEST, CAMERA_SPEED);
 
     UpdateCamera();
