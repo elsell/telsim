@@ -30,13 +30,13 @@ function c_Emergency()
 function c_Up(args)
 { 
     console.log("Executing: " + arguments.callee.name) 
-    COPTER_DEST.z += parseFloat(args[0]);
+    COPTER_DEST.z += CentemeterToFoot(parseFloat(args[0]));
 }
 
 function c_Down(args)
 { 
     console.log("Executing: " + arguments.callee.name) 
-    COPTER_DEST.z -= parseFloat(args[0]);
+    COPTER_DEST.z -= CentemeterToFoot(parseFloat(args[0]));
 
     if(COPTER_DEST.z < 0) { COPTER_DEST.z = 0; }
 }
@@ -44,25 +44,25 @@ function c_Down(args)
 function c_Left(args)
 { 
     console.log("Executing: " + arguments.callee.name) 
-    COPTER_DEST.x -= parseFloat(args[0]);
+    COPTER_DEST.x -= CentemeterToFoot(parseFloat(args[0]));
 }
 
 function c_Right(args)
 { 
     console.log("Executing: " + arguments.callee.name) 
-    COPTER_DEST.x += parseFloat(args[0]);
+    COPTER_DEST.x += CentemeterToFoot(parseFloat(args[0]));
 }
 
 function c_Forward(args)
 { 
     console.log("Executing: " + arguments.callee.name) 
-    COPTER_DEST.y -= parseFloat(args[0]);
+    COPTER_DEST.y -= CentemeterToFoot(parseFloat(args[0]));
 }
 
 function c_Back(args)
 { 
     console.log("Executing: " + arguments.callee.name) 
-    COPTER_DEST.y += parseFloat(args[0]);
+    COPTER_DEST.y += CentemeterToFoot(parseFloat(args[0]));
 
 }
 
