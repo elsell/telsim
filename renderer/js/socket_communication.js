@@ -1,5 +1,6 @@
 var ipcRenderer   = require('electron').ipcRenderer;
 const COMMAND_KEY = "quad-command";
+const CONNECT_STATUS_KEY     = "conn-status";
 
 // Recieve Command
 ipcRenderer.on(COMMAND_KEY, (e, command) =>
@@ -17,6 +18,11 @@ ipcRenderer.on(COMMAND_KEY, (e, command) =>
         console.error(e);
         SendResponseCode(false, "404")
     }
+});
+
+ipcRenderer.on(CONNECT_STATUS_KEY, (e, status) =>
+{
+    console.log(status);
 });
 
 function SendResponseCode(ok = true, errorCode = "")

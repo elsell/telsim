@@ -2,7 +2,7 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const WebSocket              = require('ws');
 const WEB_SOCKET_PORT        = 9990;
 const COMMAND_KEY            = "quad-command";
-
+const CONNECT_STATUS_KEY     = "conn-status";
 const wss = new WebSocket.Server({port: WEB_SOCKET_PORT});
 let window;
 
@@ -12,10 +12,16 @@ let DEBUG = true;
 wss.on('connection', ws => {
     ws.on('message', message => {
         Log(`Received: ${message}`);
+        window.webContents.send(CONNECT_STATUS_KEY, true);
 
         // Send recieved message to the renderer window
         window.webContents.send(COMMAND_KEY, String(message));
-    }) 
+    });
+    
+    ws.on("close", (reasonCode, desc) =>
+    {
+        window.webContents.send(CONNECT_STATUS_KEY, false);
+    });
 });
 
 // Recieve Response from Renderer to Send to Client
@@ -39,6 +45,8 @@ function CreateWindow ()
             nodeIntegration: true
         }
     });
+
+    window.setMenuBarVisibility(false);
 
     // and load renderer webpage
     window.loadFile("renderer/index.html");
