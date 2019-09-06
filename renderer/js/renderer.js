@@ -20,6 +20,8 @@ let VIEWS =
     cornerView: { x:1000, y: 200, z: 1000 }
 };
 
+let COMMANDS = [];
+
 // How many pixels represent 1 foot
 let ONE_FOOT = 20;
 
@@ -149,6 +151,22 @@ function DrawAxes()
     pop();
 }
 
+function CopterInPosition(curPos, destPos, speed)
+{
+    var fps = frameRate();
+    var distanceToTravel = 1 / fps * speed;
+
+    return(
+        curPos.x > destPos.x - distanceToTravel &&
+        curPos.x < destPos.x + distanceToTravel &&
+        curPos.y > destPos.y - distanceToTravel &&
+        curPos.y < destPos.y + distanceToTravel &&
+        curPos.z > destPos.z - distanceToTravel &&
+        curPos.z < destPos.z + distanceToTravel 
+    );
+
+}
+
 // Increments curPos according to the speed provided
 function InterpolatePosition(curPos, destPos, speed)
 {
@@ -156,15 +174,7 @@ function InterpolatePosition(curPos, destPos, speed)
 
     var distanceToTravel = 1 / fps * speed;
 
-    if
-    (
-        curPos.x > destPos.x - distanceToTravel &&
-        curPos.x < destPos.x + distanceToTravel &&
-        curPos.y > destPos.y - distanceToTravel &&
-        curPos.y < destPos.y + distanceToTravel &&
-        curPos.z > destPos.z - distanceToTravel &&
-        curPos.z < destPos.z + distanceToTravel 
-    )
+    if(CopterInPosition(curPos, destPos, speed))
     {
         return; 
     }
@@ -238,6 +248,17 @@ function SetLighting()
 
 }
 
+function HandleCommands()
+{
+    if(!CopterInPosition(COPTER_POS, COPTER_DEST, COPTER_SPEED)) { return; }
+    
+    var curCmd = COMMANDS.pop();
+
+    if(!curCmd) { return; }
+
+    curCmd.Execute();
+}
+
 // Called every frame
 function draw()
 {
@@ -254,6 +275,8 @@ function draw()
     DrawAxes();
 
     drawFloor();
+
+    HandleCommands();
 
     InterpolatePosition(COPTER_POS, COPTER_DEST, COPTER_SPEED);
 

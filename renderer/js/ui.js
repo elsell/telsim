@@ -17,6 +17,7 @@ $(document).ready(()=>
 
     $("#reset").on("click", ()=>
     {
+        COMMANDS = [];
         COPTER_DEST = { x: 0, y: 0, z: 0 }; 
     });
 });
