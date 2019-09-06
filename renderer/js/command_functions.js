@@ -1,5 +1,3 @@
-// TODO: Check bounds for command parameters
-
 function GetCallingFuncName() 
 {
    var funName = arguments.caller.toString();
@@ -7,6 +5,12 @@ function GetCallingFuncName()
    funName = funName.substr(0, funName.indexOf('('));
 
    return funName;
+}
+
+// Returns true if (lowerBound <= val <= upperBound)
+function IsInRange(val, lowerBound, upperBound)
+{
+    return(val >= lowerBound && val <= upperBound);
 }
 
 function CentemeterToFoot(centemeters)
@@ -32,15 +36,33 @@ function c_Emergency(callingCmd)
 function c_Up(args)
 { 
     console.log("Executing: " + arguments.callee.name) 
-    COPTER_DEST.z += CentemeterToFoot(parseFloat(args[0]));
+
+    var dist = parseFloat(args[0]);
+
+    if(!IsInRange(dist, 20, 500))
+    {
+        SendResponseCode(false, "Distance parameter for 'up' must be between"
+         + " 20 and 500.");
+         return;
+    }
+
+    COPTER_DEST.z += CentemeterToFoot(dist);
     SendResponseCode(true);
-    
 }
 
 function c_Down(args)
 { 
     console.log("Executing: " + arguments.callee.name) 
-    COPTER_DEST.z -= CentemeterToFoot(parseFloat(args[0]));
+    var dist = parseFloat(args[0]);
+
+    if(!IsInRange(dist, 20, 500))
+    {
+        SendResponseCode(false, "Distance parameter for 'down' must be between"
+         + " 20 and 500.");
+         return;
+    }
+
+    COPTER_DEST.z -= CentemeterToFoot(dist);
 
     if(COPTER_DEST.z < 0) { COPTER_DEST.z = 0; }
     SendResponseCode(true);
@@ -49,29 +71,65 @@ function c_Down(args)
 
 function c_Left(args)
 { 
-    console.log("Executing: " + arguments.callee.name) 
-    COPTER_DEST.x -= CentemeterToFoot(parseFloat(args[0]));
+    console.log("Executing: " + arguments.callee.name);
+    var dist = parseFloat(args[0]);
+
+    if(!IsInRange(dist, 20, 500))
+    {
+        SendResponseCode(false, "Distance parameter for 'left' must be between"
+         + " 20 and 500.");
+         return;
+    }
+
+    COPTER_DEST.x -= CentemeterToFoot(dist);
     SendResponseCode(true);
 }
 
 function c_Right(args)
 { 
-    console.log("Executing: " + arguments.callee.name) 
-    COPTER_DEST.x += CentemeterToFoot(parseFloat(args[0]));
+    console.log("Executing: " + arguments.callee.name);
+    var dist = parseFloat(args[0]);
+
+    if(!IsInRange(dist, 20, 500))
+    {
+        SendResponseCode(false, "Distance parameter for 'right' must be between"
+         + " 20 and 500.");
+         return;
+    }
+
+    COPTER_DEST.x += CentemeterToFoot(dist);
     SendResponseCode(true);
 }
 
 function c_Forward(args)
 { 
-    console.log("Executing: " + arguments.callee.name) 
-    COPTER_DEST.y -= CentemeterToFoot(parseFloat(args[0]));
+    console.log("Executing: " + arguments.callee.name);
+    var dist = parseFloat(args[0]);
+
+    if(!IsInRange(dist, 20, 500))
+    {
+        SendResponseCode(false, "Distance parameter for 'forward' must be between"
+         + " 20 and 500.");
+         return;
+    }
+
+    COPTER_DEST.y -= CentemeterToFoot(dist);
     SendResponseCode(true);
 }
 
 function c_Back(args)
 { 
-    console.log("Executing: " + arguments.callee.name) 
-    COPTER_DEST.y += CentemeterToFoot(parseFloat(args[0]));
+    console.log("Executing: " + arguments.callee.name);
+    var dist = parseFloat(args[0]);
+
+    if(!IsInRange(dist, 20, 500))
+    {
+        SendResponseCode(false, "Distance parameter for 'back' must be between"
+         + " 20 and 500.");
+         return;
+    }
+
+    COPTER_DEST.y += CentemeterToFoot(dist);
     SendResponseCode(true);
 }
 

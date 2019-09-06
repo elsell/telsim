@@ -32,7 +32,7 @@ function SendResponseCode(ok = true, errorCode = "")
     {
         if(errorCode !== "")
         {
-            RespondToClient(errorCode);
+            RespondToClient("error " + errorCode);
         }
         else
         {
