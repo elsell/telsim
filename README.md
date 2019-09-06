@@ -1,6 +1,8 @@
 # telsim
 A simulated implementation of the DJI Tello quad-copter API
 
+### Further Documentation Available on the Telsim [Wiki](https://github.com/elsell/telsim/wiki)
+
 ## Running Telsim
 _Telsim is an [Electron](https://electronjs.org) app which runs on [NodeJS](https://nodejs.org/en/)_
 
