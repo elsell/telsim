@@ -9,14 +9,11 @@ ipcRenderer.on(COMMAND_KEY, (e, command) =>
     {
         cmdData = TelloTranslate.Translate(command);
 
-        result = cmdData.func(cmdData.argv);
-
-        SendResponseCode(true);
-
+        COMMANDS.push(new Command(cmdData.func, cmdData.argv));
     }catch(e)
     {
         console.error(e);
-        SendResponseCode(false, "404")
+        SendResponseCode(false, "Invalid Command")
     }
 });
 

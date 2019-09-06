@@ -1,3 +1,5 @@
+// TODO: Check bounds for command parameters
+
 function GetCallingFuncName() 
 {
    var funName = arguments.caller.toString();
@@ -17,12 +19,12 @@ function FootToCentemeter(feet)
     return feet * 30.48;
 }
 
-function c_Land()
+function c_Land(callingCmd)
 { console.log("Executing: " + arguments.callee.name) 
     
 }
 
-function c_Emergency()
+function c_Emergency(callingCmd)
 { console.log("Executing: " + arguments.callee.name) 
     
 }
@@ -31,6 +33,8 @@ function c_Up(args)
 { 
     console.log("Executing: " + arguments.callee.name) 
     COPTER_DEST.z += CentemeterToFoot(parseFloat(args[0]));
+    SendResponseCode(true);
+    
 }
 
 function c_Down(args)
@@ -39,64 +43,69 @@ function c_Down(args)
     COPTER_DEST.z -= CentemeterToFoot(parseFloat(args[0]));
 
     if(COPTER_DEST.z < 0) { COPTER_DEST.z = 0; }
+    SendResponseCode(true);
+    
 }
 
 function c_Left(args)
 { 
     console.log("Executing: " + arguments.callee.name) 
     COPTER_DEST.x -= CentemeterToFoot(parseFloat(args[0]));
+    SendResponseCode(true);
 }
 
 function c_Right(args)
 { 
     console.log("Executing: " + arguments.callee.name) 
     COPTER_DEST.x += CentemeterToFoot(parseFloat(args[0]));
+    SendResponseCode(true);
 }
 
 function c_Forward(args)
 { 
     console.log("Executing: " + arguments.callee.name) 
     COPTER_DEST.y -= CentemeterToFoot(parseFloat(args[0]));
+    SendResponseCode(true);
 }
 
 function c_Back(args)
 { 
     console.log("Executing: " + arguments.callee.name) 
     COPTER_DEST.y += CentemeterToFoot(parseFloat(args[0]));
-
+    SendResponseCode(true);
 }
 
 function c_Cw(args)
 { console.log("Executing: " + arguments.callee.name) 
-
+    
 }
 
 function c_Ccw(args)
 { console.log("Executing: " + arguments.callee.name) 
-
+    
 }
 
 function c_Flip(args)
 { console.log("Executing: " + arguments.callee.name) 
-
+    
 }
 
 function c_Go(args)
 { console.log("Executing: " + arguments.callee.name) 
-
+    
 }
 
 function c_Stop()
 { console.log("Executing: " + arguments.callee.name) 
-
+    
 }
 
 function c_Curve(args)
 { console.log("Executing: " + arguments.callee.name) 
-
+    
 }
 
 function c_Speed(args)
 { console.log("Executing: " + arguments.callee.name) 
-
+    
 }
