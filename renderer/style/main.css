@@ -1,0 +1,12 @@
+@font-face {
+    font-family: "incosolata";
+    src: url("../assets/incosolata.ttf");
+}
+
+body, html
+{
+    padding: 0px;
+    margin: 0px;
+    font-family: 'incosolata', serif;
+}
+

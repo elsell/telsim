@@ -1,10 +1,51 @@
 <html>
     <head>
+        <!-- jQuery -->
+        <script>
+            if (typeof module === 'object')
+            { window.module = module; module = undefined; }
+        </script>
+
+        <script src="js/jquery.min.js"></script>
+
+        <script>
+            if (window.module)
+            { module = window.module; }
+        </script>
+
+        <!-- p5.js -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/p5.js"></script>
+        <script src="js/p5.dom.js"></script>
+        <script src="js/renderer.js"></script>
+
+        <!-- Project Files -->
+        <script src="js/command.js"></script>
         <script src="js/command_functions.js"></script>
         <script src="js/tello_translate.js"></script>
         <script src="js/socket_communication.js"></script>
+        <script src="js/ui.js"></script>
+
+        <!-- Style -->
+        <link type="text/css" rel="stylesheet" href="style/main.css">
+        <link type="text/css" rel="stylesheet" href="style/control-surface.css">
+
     </head>
     <body>
-        RENDERER.HTML
+
+        <!-- Control Surface -->
+        <div id="control-surface">
+            <div id="left-section" class="control-section">
+                <p id="fps"></p>
+            </div>
+            <div id="middle-section" class="control-section">
+                <div id="reset" class="button red"><p>RESET</p></div>
+            </div>
+            <div id="right-section" class="control-section">
+                <div id="top" class="button"><p>TOP</p></div>
+                <div id="side" class="button"><p>SIDE</p></div>
+                <div id="corner" class="button"><p>CORNER</p></div>
+            </div>
+        </div>
+        <!-- /Control Surface -->
     </body>
 </html>

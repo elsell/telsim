@@ -19,5 +19,8 @@
   "devDependencies": {
     "electron": "^6.0.5",
     "ws": "^7.1.2"
+  },
+  "dependencies": {
+    "jquery": "^3.4.1"
   }
 }
