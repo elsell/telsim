@@ -59,3 +59,9 @@ typings/
 
 # next.js build output
 .next
+
+# python 3
+__pycache__
+
+# emacs autosave files
+*~
