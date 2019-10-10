@@ -13,6 +13,7 @@ thresholds = {'green': ((15, 193, 128), (39, 244, 207)),
               'teal-webcam': ((95, 186, 118), (147, 255, 255)),
               'fuschia': ((156, 184, 30), (180, 255, 255)),
               'fuschia-webcam': ((138, 140, 30), (187, 255, 255)),
+              'blue-webcam': ((110, 72, 34), (130, 255, 255)),
 }
 
 def threshold_image(image, color):
@@ -28,7 +29,7 @@ def threshold_image(image, color):
     thresh = cv2.dilate(thresh, None, iterations=1)
     return thresh
 
-def find_contour(thresh, minimum_area=200):
+def find_contour(thresh, minimum_area=400):
     contours = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     contours = contours[1]
 
@@ -37,10 +38,17 @@ def find_contour(thresh, minimum_area=200):
         approx = cv2.approxPolyDP(c, 0.05*peri, True)
         area = cv2.contourArea(c)
         if len(approx) == 4 and area >= minimum_area:
-            #print(area)
             return approx
 
     return None
+
+def contained_within(contour_larger, contour_smaller):
+    """Test if contour_smaller is contained within contour_larger"""
+    for (x,y) in contour_smaller[0]:
+        result = cv2.pointPolygonTest(contour_larger, (x,y), False)
+        if result != 1:
+            return False
+    return True
 
 def get_points(contour):
     return contour.ravel().reshape((4, 2))
@@ -94,6 +102,8 @@ def calculate_direction(delta, eps=20):
         return direction
     else:
         return 0
+
+
 
 
 # class MovingAverage:
