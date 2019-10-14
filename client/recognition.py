@@ -17,7 +17,8 @@ thresholds = {'green': ((15, 193, 128), (39, 244, 207)),
 }
 
 def threshold_image(image, color):
-    # blur image, but keep edges
+    """Select only the objects in the image that match the given color"""
+    # blur image, reduce noise, keep edges
     blur = cv2.bilateralFilter(image, 11, 17, 17)
 
     # convert to HSV and threshold image
@@ -29,14 +30,21 @@ def threshold_image(image, color):
     thresh = cv2.dilate(thresh, None, iterations=1)
     return thresh
 
-def find_contour(thresh, minimum_area=400):
-    contours = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+def find_contour(image, minimum_area=400):
+    """Attempt to find a 4-sided polygon in the image with a minimum
+area. Return it if successful otherwise return None.
+
+    """
+    # find all possible contours in image
+    contours = cv2.findContours(image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     contours = contours[1]
 
+    # sort the contours by area, largest to smallest
     for c in sorted(contours, key=cv2.contourArea, reverse=True):
         peri = cv2.arcLength(c, True)
         approx = cv2.approxPolyDP(c, 0.05*peri, True)
         area = cv2.contourArea(c)
+        # select polygons that are 4-sided and greater than minimum area
         if len(approx) == 4 and area >= minimum_area:
             return approx
 
@@ -51,35 +59,41 @@ def contained_within(contour_larger, contour_smaller):
     return True
 
 def get_points(contour):
+    """Extract points from a 4-point contour"""
     return contour.ravel().reshape((4, 2))
 
-def pairwise(iterable):
-    """s -> (s0, s1), (s1, s2), ..."""
-    a, b = itertools.tee(iterable)
-    next(b, None)
-    return zip(a, b)
+# def pairwise(iterable):
+#     """Create pairwise iterator: s -> (s0, s1), (s1, s2), ..."""
+#     a, b = itertools.tee(iterable)
+#     next(b, None)
+#     return zip(a, b)
 
-def draw_lines(image, points):
-    colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (100, 100, 0)]
-    for (p1, p2), c in zip(pairwise(points), colors):
-        cv2.line(image, p1, p2, color, 2)
+# def draw_lines(image, points):
+#     """Draw lines on the image between each point in a pairwise fashion"""
+#     colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (100, 100, 0)]
+#     for (p1, p2), c in zip(pairwise(points), colors):
+#         cv2.line(image, p1, p2, color, 2)
 
 def get_centroid(contour):
+    """Return the centroid of the contour"""
     M = cv2.moments(contour)
     x = int(M["m10"] / M["m00"])
     y = int(M["m01"] / M["m00"])
     return x, y
 
 def found_target(contour):
+    """Test if contour is satisfactory, currently if it is not None"""
     return contour is not None
 
 def image_center(image):
+    """Calculate the center pixel of the image and return (x, y)"""
     height, width, _ = image.shape
     cx = width//2
     cy = height//2
     return cx, cy
 
 def centroid_displacement(contour, image):
+    """Calculate the displacement between the contour's centroid and the image center"""
     cx, cy = image_center(image)
     x, y = get_centroid(contour)
     dx = x - cx
@@ -87,15 +101,18 @@ def centroid_displacement(contour, image):
     return dx, dy
 
 def target_within_limits(displacement, delta = 20):
+    """Test is the displacement distance is less than delta"""
     dx, dy = displacement
     return dx**2 + dy**2 <= delta**2
 
 def find_target(frame, target):
+    """Find a colored target within the frame and return the enclosing contour"""
     thresh = threshold_image(frame, target)
     contour = find_contour(thresh)
     return contour
 
 def calculate_direction(delta, eps=20):
+    """Given a centroid displacement value, calculate the direction to move"""
     magnitude = abs(delta)
     if magnitude > eps:
         direction = int(delta / magnitude)
