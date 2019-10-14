@@ -100,6 +100,9 @@ def centroid_displacement(contour, image):
     dy = y - cy
     return dx, dy
 
+def contour_area(contour):
+    return cv2.contourArea(contour)
+
 def target_within_limits(displacement, delta = 20):
     """Test is the displacement distance is less than delta"""
     dx, dy = displacement
@@ -148,7 +151,17 @@ class FindTarget:
             yaw = calculate_direction(dx)
             up_down = calculate_direction(dy)
 
+            # compute centroid area and move drone towards target
+            area = contour_area(contour_outer)
+            if area < 50000:
+                forward_backward = 1
+            elif area > 80000:
+                forward_backward = -1
+            else:
+                forward_backward = 0
+
             # send drone directions
+            self.controller.set_forward_backward(forward_backward)
             self.controller.set_yaw(yaw)
             self.controller.set_up_down(up_down)
             self.controller.send()
