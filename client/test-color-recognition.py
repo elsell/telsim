@@ -1,6 +1,7 @@
 import cv2
 import drone
 import controller
+import recognition
 
 # colors to describe target
 color_outer = 'fuschia-webcam'
@@ -8,7 +9,7 @@ color_inner = 'blue-webcam'
 
 drone = drone.FakeDrone()
 control = controller.DroneController(drone)
-finder = controller.FindTarget(control, color_outer, color_inner)
+finder = recognition.FindTarget(control, color_outer, color_inner)
 
 drone.battery()
 drone.takeoff()

@@ -105,21 +105,47 @@ def calculate_direction(delta, eps=20):
 
 
 
+class FindTarget:
+    def __init__(self, controller, color_outer, color_inner):
+        self.controller = controller
+        self.color_outer = color_outer
+        self.color_inner = color_inner
+        self.no_target_frame_count = 0
+        self.contour_outer = None
+        self.contour_inner = None
 
-# class MovingAverage:
-#     def __init__(self, N):
-#         self.N = N # number of points to average
-#         self.values = deque()
+    def process(self, frame, draw=False):
+        # attempt to find two contours
+        contour_outer = find_target(frame, self.color_outer)
+        contour_inner = find_target(frame, self.color_inner)
+    
+        if (found_target(contour_outer) and
+            found_target(contour_inner) and
+            contained_within(contour_outer, contour_inner)):
+            # found target, so reset counter
+            self.no_target_frame_count = 0
 
-#     def add(self, v):
-#         if len(self.values) < self.N:
-#             self.values.append(v)
-#         else:
-#             self.values.popleft()
-#             self.values.append(v)
+            # compute displacements and directions to move drone
+            dx, dy = centroid_displacement(contour_outer, frame)
+            cx, cy = image_center(frame)
+            yaw = calculate_direction(dx)
+            up_down = calculate_direction(dy)
 
-#     def average(self):
-#         if len(self.values) == 1:
-#             return self.values[0]
-#         else:
-#             return numpy.average(self.values, axis=0)
+            # send drone directions
+            self.controller.set_yaw(yaw)
+            self.controller.set_up_down(up_down)
+            self.controller.send()
+
+            if draw:
+                # draw contours on frame
+                cv2.line(frame, (cx, cy), (cx+dx, cy+dy), (0, 0, 255), 1)
+                cv2.drawContours(frame, [contour_outer], -1, (0, 255, 0), 0)
+                cv2.drawContours(frame, [contour_inner], -1, (0, 255, 0), 0)
+                centroid = get_centroid(contour_outer)
+                cv2.circle(frame, centroid, 3, (255, 255, 255), -1)
+
+        else:
+            self.no_target_frame_count += 1
+            if self.no_target_frame_count > 10:
+                self.controller.stop()
+                no_target_frame_count = 0
