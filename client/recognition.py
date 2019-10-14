@@ -11,7 +11,8 @@ thresholds = {'green': ((15, 193, 128), (39, 244, 207)),
               'blue': ((38, 145, 64), (156, 255, 255)),
               'teal': ((97, 60, 49), (103, 255, 255)),
               'teal-webcam': ((95, 186, 118), (147, 255, 255)),
-              'fuschia': ((156, 184, 30), (180, 255, 255)),
+              'fuschia': ((118, 129, 37), (177, 255, 255)),
+              'blue': ((106, 94, 44), (138, 255, 255)),
               'fuschia-webcam': ((138, 140, 30), (187, 255, 255)),
               'blue-webcam': ((110, 72, 34), (130, 255, 255)),
 }
@@ -58,9 +59,21 @@ def contained_within(contour_larger, contour_smaller):
             return False
     return True
 
-def get_points(contour):
+def get_sorted_points(contour):
     """Extract points from a 4-point contour"""
-    return contour.ravel().reshape((4, 2))
+    points = contour.ravel().reshape((4, 2))
+    a, b, c, d = [(x, y) for (x, y) in sorted(points, key=lambda xy: xy[0])]
+    if a[1] > b[1]:
+        a, b = b, a
+    if c[1] > d[1]:
+        c, d = d, c
+    return a, b, c, d
+
+def calculate_vertical_line_ratio(contour):
+    a, b, c, d = get_sorted_points(contour)
+    left_vertical = b[1] - a[1]
+    right_vertical = d[1] - c[1]
+    return left_vertical / right_vertical
 
 # def pairwise(iterable):
 #     """Create pairwise iterator: s -> (s0, s1), (s1, s2), ..."""
@@ -160,7 +173,17 @@ class FindTarget:
             else:
                 forward_backward = 0
 
+            # compute left-right based on ratio of sides of target
+            ratio = calculate_vertical_line_ratio(contour_outer)
+            if ratio < 0.95:
+                left_right = -1
+            elif ratio > 1.05:
+                left_right = 1
+            else:
+                left_right = 0
+                
             # send drone directions
+            self.controller.set_left_right(left_right)
             self.controller.set_forward_backward(forward_backward)
             self.controller.set_yaw(yaw)
             self.controller.set_up_down(up_down)
