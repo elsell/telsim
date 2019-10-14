@@ -135,7 +135,7 @@ class Drone:
         self.send_udp('rc {} {} {} {}'.format(int(left_right), int(forward_backward),
                                               int(up_down), int(yaw)))
         
-class FakeDrone:
+class WebcamDrone:
     """Simulated drone for testing rc controls. Uses webcam for video stream."""
     def __init__(self):
         self.frame = None
