@@ -12,7 +12,7 @@ input parameters are an instance of the Drone class in drone.py and
     the speed of movements (0-100)
 
     """
-    def __init__(self, drone, speed=20):
+    def __init__(self, drone, speed=10):
         self.drone = drone
         self.left_right = 0
         self.forward_backward = 0
@@ -57,6 +57,14 @@ input parameters are an instance of the Drone class in drone.py and
 
     def stop(self):
         """Set drone controls to zero - stop moving"""
+        if self.left_right != 0:
+            self.left_right = 0
+            self.changed = True
+
+        if self.forward_backward != 0:
+            self.forward_backward = 0
+            self.changed = True
+            
         if self.up_down != 0:
             self.up_down = 0
             self.changed = True
