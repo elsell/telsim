@@ -21,15 +21,29 @@ input parameters are an instance of the Drone class in drone.py and
         self.speed = int(speed)
         self.changed = False
 
+    def set_left_right(self, direction):
+        """Set the left_right direction if it differs from the current status"""
+        value = self.speed * int(direction)
+        if self.left_right != value:
+            self.left_right = value
+            self.changed = True
+
+    def set_forward_backward(self, direction):
+        """Set the forward_backward direction if it differs from the current status"""
+        value = self.speed * int(direction)
+        if self.forward_backward != value:
+            self.forward_backward = value
+            self.changed = True
+        
     def set_up_down(self, direction):
-        """Set the up_down direction if it differs from current status"""
+        """Set the up_down direction if it differs from the current status"""
         value = -self.speed * int(direction)
         if self.up_down != value:
             self.up_down = value
             self.changed = True
 
     def set_yaw(self, direction):
-        """Set the yaw direction if it differs from current status"""
+        """Set the yaw direction if it differs from the current status"""
         value = self.speed * int(direction)
         if self.yaw != value:
             self.yaw = value
