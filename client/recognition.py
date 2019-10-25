@@ -59,7 +59,7 @@ def contained_within(contour_larger, contour_smaller):
             return False
     return True
 
-def get_sorted_points(contour):
+def sorted_points(contour):
     """Extract points from a 4-point contour"""
     points = contour.ravel().reshape((4, 2))
     a, b, c, d = [(x, y) for (x, y) in sorted(points, key=lambda xy: xy[0])]
@@ -69,11 +69,21 @@ def get_sorted_points(contour):
         c, d = d, c
     return a, b, c, d
 
-def calculate_vertical_line_ratio(contour):
-    a, b, c, d = get_sorted_points(contour)
-    left_vertical = b[1] - a[1]
-    right_vertical = d[1] - c[1]
-    return left_vertical / right_vertical
+def vertical_line_lengths(contour):
+    a, b, c, d = sorted_points(contour)
+    left = b[1] - a[1]
+    right = d[1] - c[1]
+    return left, right
+
+def vertical_line_ratio(contour):
+    left, right = vertical_line_lengths(contour)
+    return left / right
+
+def distance(contour):
+    left, right = vertical_line_lengths(contour)
+    avg = (left + right) / 2
+    factor = 88.7 # webcam
+    return factor / avg # meters
 
 # def pairwise(iterable):
 #     """Create pairwise iterator: s -> (s0, s1), (s1, s2), ..."""
@@ -87,7 +97,7 @@ def calculate_vertical_line_ratio(contour):
 #     for (p1, p2), c in zip(pairwise(points), colors):
 #         cv2.line(image, p1, p2, color, 2)
 
-def get_centroid(contour):
+def centroid(contour):
     """Return the centroid of the contour"""
     M = cv2.moments(contour)
     x = int(M["m10"] / M["m00"])
@@ -108,7 +118,7 @@ def image_center(image):
 def centroid_displacement(contour, image):
     """Calculate the displacement between the contour's centroid and the image center"""
     cx, cy = image_center(image)
-    x, y = get_centroid(contour)
+    x, y = centroid(contour)
     dx = x - cx
     dy = y - cy
     return dx, dy
@@ -127,7 +137,7 @@ def find_target(frame, target):
     contour = find_contour(thresh)
     return contour
 
-def calculate_direction(delta, eps=20):
+def direction(delta, eps=20):
     """Given a centroid displacement value, calculate the direction to move"""
     magnitude = abs(delta)
     if magnitude > eps:
@@ -136,45 +146,59 @@ def calculate_direction(delta, eps=20):
     else:
         return 0
 
-
-
-class FindTarget:
-    def __init__(self, controller, color_outer, color_inner):
-        self.controller = controller
+class TargetIdentifier:
+    def __init__(self, color_outer, color_inner):
         self.color_outer = color_outer
         self.color_inner = color_inner
-        self.no_target_frame_count = 0
         self.contour_outer = None
         self.contour_inner = None
 
-    def process(self, frame, draw=False):
-        # attempt to find two contours
+    def find_contour(self, frame):
         contour_outer = find_target(frame, self.color_outer)
         contour_inner = find_target(frame, self.color_inner)
-    
-        if (found_target(contour_outer) and
-            found_target(contour_inner) and
+        if (contour_outer is not None and
+            contour_inner is not None and
             contained_within(contour_outer, contour_inner)):
+            self.contour_outer = contour_outer
+            self.contour_inner = contour_inner
+            return contour_outer
+        else:
+            self.contour_outer = None
+            self.contour_inner = None
+            return None
+            
+
+class FindTarget:
+    def __init__(self, controller, identifier):
+        self.controller = controller
+        self.identifier = identifier
+        self.no_target_frame_count = 0
+
+    def process(self, frame, draw=False):
+        contour = self.identifier.find_contour(frame)
+        if contour is not None:
             # found target, so reset counter
             self.no_target_frame_count = 0
 
             # compute displacements and directions to move drone
-            dx, dy = centroid_displacement(contour_outer, frame)
+            dx, dy = centroid_displacement(contour, frame)
             cx, cy = image_center(frame)
-            yaw = calculate_direction(dx)
-            up_down = calculate_direction(dy)
+            yaw = direction(dx)
+            up_down = direction(dy)
 
-            # compute centroid area and move drone towards target
-            area = contour_area(contour_outer)
-            if area < 50000:
+            # compute distance and move drone towards target
+            dist = distance(contour)
+            if dist > 0.4:
                 forward_backward = 1
-            elif area > 80000:
+            elif dist < 0.35:
                 forward_backward = -1
             else:
                 forward_backward = 0
 
             # compute left-right based on ratio of sides of target
-            ratio = calculate_vertical_line_ratio(contour_outer)
+            left, right = vertical_line_lengths(contour)
+            #print(left, right, dist)
+            ratio = vertical_line_ratio(contour)
             if ratio < 0.95:
                 left_right = -1
             elif ratio > 1.05:
@@ -192,10 +216,9 @@ class FindTarget:
             if draw:
                 # draw contours on frame
                 cv2.line(frame, (cx, cy), (cx+dx, cy+dy), (0, 0, 255), 1)
-                cv2.drawContours(frame, [contour_outer], -1, (0, 255, 0), 0)
-                cv2.drawContours(frame, [contour_inner], -1, (0, 255, 0), 0)
-                centroid = get_centroid(contour_outer)
-                cv2.circle(frame, centroid, 3, (255, 255, 255), -1)
+                cv2.drawContours(frame, [contour], -1, (0, 255, 0), 0)
+                cent = centroid(contour)
+                cv2.circle(frame, cent, 3, (255, 255, 255), -1)
 
         else:
             self.no_target_frame_count += 1

@@ -7,10 +7,11 @@ import recognition
 color_outer = 'fuschia' # 'fuschia-webcam'
 color_inner = 'blue' # 'blue-webcam'
 
-# drone = drone.WebcamDrone()
-drone = drone.Drone()
+drone = drone.WebcamDrone()
+#drone = drone.Drone()
 control = controller.DroneController(drone)
-finder = recognition.FindTarget(control, color_outer, color_inner)
+identifier = recognition.TargetIdentifier(color_outer, color_inner)
+finder = recognition.FindTarget(control, identifier)
 
 drone.battery()
 drone.takeoff()
