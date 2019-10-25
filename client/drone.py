@@ -173,4 +173,4 @@ class WebcamDrone:
         
     def rc(self, a, b, c, d):
         self.command_num += 1
-        print(self.command_num, ': rc {} {} {} {}'.format(a, b, c, d))
+        print('{:4d}: rc l/r={:4d} f/b={:4d} u/d={:4d} yaw={:4d}'.format(self.command_num, a, b, c, d))
