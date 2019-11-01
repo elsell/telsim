@@ -7,22 +7,26 @@ class State:
         raise NotImplementedError("Override on_frame in derived class")
 
 
-class Seek(State):
+class LookAround(State):
     """Rotate around until the drone sees the target"""
     def __init__(self, identifier, controller):
         self.identifier = identifier
         self.controller = controller
         self.controller.set_yaw(1)
         self.start_time = time.monotonic()
+        print('LookAround:enter')
 
     def on_frame(self, frame):
         elapsed_time = time.monotonic() - self.start_time
         if elapsed_time > 5:
-        contour = self.identifier.find_contour(frame)
-        if contour is None:
-            return self
-        else:
+            print('LookAround:timeout')
+            return None
+
+        if self.identifier.find_contour(frame):
+            print('LookAround:exit')
             return LookAt(self.identifier, self.controller)
+        else:
+            return self
 
     
 class LookAt(State):
@@ -30,22 +34,27 @@ class LookAt(State):
     def __init__(self, identifier, controller):
         self.identifier = identifier
         self.controller = controller
+        print('LookAt:enter')
         
     def on_frame(self, frame):
-        contour = self.identifier.find_contour(frame)
-        if contour is not None:
-            dx, dy = recognition.centroid_displacement(contour, frame)
+        if self.identifier.find_contour(frame):
+            self.identifier.draw()
+            dx, dy = self.identifier.displacement()
             yaw = recognition.direction(dx)
             up_down = recognition.direction(dy)
             self.controller.set_yaw(yaw)
             self.controller.set_up_down(up_down)
             self.controller.send()
+            return self
+        else:
+            print('LookAt:exit')
+            return LookAround(self.identifier, self.controller)
 
-        return self
 
-class Machine:
-    def __init__(self, init_state):
-        self.state = init_state
+class AlignmentFSM:
+    def __init__(self, identifier, controller):
+        self.state = LookAround(identifier, controller)
 
     def on_frame(self, frame):
         self.state = self.state.on_frame(frame)
+        return self.state
