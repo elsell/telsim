@@ -154,16 +154,20 @@ class TargetIdentifier:
             return False
 
     def displacement(self):
-        return centroid_displacement(self.contour_outer, self.frame)
+        if self.contour_outer:
+            return centroid_displacement(self.contour_outer, self.frame)
 
     def distance(self):
-        return distance(self.contour_outer)
+        if self.contour_outer:
+            return distance(self.contour_outer)
 
     def vertical_line_ratio(self):
-        return vertical_line_ratio(self.contour_outer)
+        if self.contour_outer:
+            return vertical_line_ratio(self.contour_outer)
 
     def draw(self):
-        cv2.drawContours(self.frame, [self.contour_outer], -1, (0, 255, 0), 0)
+        if self.contour_outer:
+            cv2.drawContours(self.frame, [self.contour_outer], -1, (0, 255, 0), 0)
         
 
 class FindTarget:
