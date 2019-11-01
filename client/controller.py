@@ -8,43 +8,37 @@ track of the last command sent to the drone and only forwards on new
 commands if they differ from the last one sent. This avoid sending the
 same command every video frame to the drone.
 
-input parameters are an instance of the Drone class in drone.py and
-    the speed of movements (0-100)
+input parameters are an instance of the Drone class in drone.py
 
     """
-    def __init__(self, drone, speed=10):
+    def __init__(self, drone):
         self.drone = drone
         self.left_right = 0
         self.forward_backward = 0
         self.up_down = 0
         self.yaw = 0
-        self.speed = int(speed)
         self.changed = False
 
-    def set_left_right(self, direction):
+    def set_left_right(self, value):
         """Set the left_right direction if it differs from the current status"""
-        value = self.speed * int(direction)
         if self.left_right != value:
             self.left_right = value
             self.changed = True
 
-    def set_forward_backward(self, direction):
+    def set_forward_backward(self, value):
         """Set the forward_backward direction if it differs from the current status"""
-        value = self.speed * int(direction)
         if self.forward_backward != value:
             self.forward_backward = value
             self.changed = True
         
-    def set_up_down(self, direction):
+    def set_up_down(self, value):
         """Set the up_down direction if it differs from the current status"""
-        value = -self.speed * int(direction)
         if self.up_down != value:
             self.up_down = value
             self.changed = True
 
-    def set_yaw(self, direction):
+    def set_yaw(self, value):
         """Set the yaw direction if it differs from the current status"""
-        value = self.speed * int(direction)
         if self.yaw != value:
             self.yaw = value
             self.changed = True
