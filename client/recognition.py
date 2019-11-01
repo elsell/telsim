@@ -85,28 +85,12 @@ def distance(contour):
     factor = 88.7 # webcam
     return factor / avg # meters
 
-# def pairwise(iterable):
-#     """Create pairwise iterator: s -> (s0, s1), (s1, s2), ..."""
-#     a, b = itertools.tee(iterable)
-#     next(b, None)
-#     return zip(a, b)
-
-# def draw_lines(image, points):
-#     """Draw lines on the image between each point in a pairwise fashion"""
-#     colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (100, 100, 0)]
-#     for (p1, p2), c in zip(pairwise(points), colors):
-#         cv2.line(image, p1, p2, color, 2)
-
 def centroid(contour):
     """Return the centroid of the contour"""
     M = cv2.moments(contour)
     x = int(M["m10"] / M["m00"])
     y = int(M["m01"] / M["m00"])
     return x, y
-
-def found_target(contour):
-    """Test if contour is satisfactory, currently if it is not None"""
-    return contour is not None
 
 def image_center(image):
     """Calculate the center pixel of the image and return (x, y)"""
@@ -120,16 +104,13 @@ def centroid_displacement(contour, image):
     cx, cy = image_center(image)
     x, y = centroid(contour)
     dx = x - cx
-    dy = y - cy
+    dy = cy - y # assume positive dy means move drone up
     return dx, dy
 
-def contour_area(contour):
-    return cv2.contourArea(contour)
-
-def target_within_limits(displacement, delta = 20):
-    """Test is the displacement distance is less than delta"""
-    dx, dy = displacement
-    return dx**2 + dy**2 <= delta**2
+def target_centered(dx, dy, radius=20):
+    """Determine if the target is centered within the given pixel
+radius"""
+    return dx**2 + dy**2 <= radius**2
 
 def find_target(frame, target):
     """Find a colored target within the frame and return the enclosing contour"""
