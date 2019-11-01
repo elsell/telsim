@@ -154,20 +154,36 @@ class TargetIdentifier:
             return False
 
     def displacement(self):
-        if self.contour_outer:
+        if self.contour_outer is not None:
             return centroid_displacement(self.contour_outer, self.frame)
 
     def distance(self):
-        if self.contour_outer:
+        if self.contour_outer is not None:
             return distance(self.contour_outer)
 
     def vertical_line_ratio(self):
-        if self.contour_outer:
+        if self.contour_outer is not None:
             return vertical_line_ratio(self.contour_outer)
 
     def draw(self):
-        if self.contour_outer:
+        if self.contour_outer is not None:
             cv2.drawContours(self.frame, [self.contour_outer], -1, (0, 255, 0), 0)
+
+            dx, dy = self.displacement()
+            cv2.putText(self.frame, "dx: {:+4d}".format(dx), (10, 250),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1,
+                        (0, 255, 0), 1, cv2.LINE_AA)
+            cv2.putText(self.frame, "dy: {:+4d}".format(dy), (10, 300),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1,
+                        (0, 255, 0), 1, cv2.LINE_AA)
+            d = self.distance()
+            cv2.putText(self.frame, "dist: {:+4.2f}".format(d), (10, 350),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1,
+                        (0, 255, 0), 1, cv2.LINE_AA)
+            r = self.vertical_line_ratio()
+            cv2.putText(self.frame, "ratio: {:+1.3f}".format(r), (10, 400),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1,
+                        (0, 255, 0), 1, cv2.LINE_AA)
         
 
 class FindTarget:
