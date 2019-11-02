@@ -51,21 +51,11 @@ input parameters are an instance of the Drone class in drone.py
 
     def stop(self):
         """Set drone controls to zero - stop moving"""
-        if self.left_right != 0:
-            self.left_right = 0
-            self.changed = True
-
-        if self.forward_backward != 0:
-            self.forward_backward = 0
-            self.changed = True
-            
-        if self.up_down != 0:
-            self.up_down = 0
-            self.changed = True
-
-        if self.yaw != 0:
-            self.yaw = 0
-            self.changed = True
+        self.left_right = 0
+        self.forward_backward = 0
+        self.up_down = 0
+        self.yaw = 0
+        self.changed = True
 
         self.send()
 
