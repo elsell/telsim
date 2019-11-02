@@ -31,7 +31,7 @@ def threshold_image(image, color):
     thresh = cv2.dilate(thresh, None, iterations=1)
     return thresh
 
-def find_contour(image, minimum_area=400):
+def find_square(image, minimum_area=400):
     """Attempt to find a 4-sided polygon in the image with a minimum
 area. Return it if successful otherwise return None.
 
@@ -112,10 +112,10 @@ def target_centered(dx, dy, radius=20):
 radius"""
     return dx**2 + dy**2 <= radius**2
 
-def find_target(frame, target):
-    """Find a colored target within the frame and return the enclosing contour"""
-    thresh = threshold_image(frame, target)
-    contour = find_contour(thresh)
+def find_square_contour(frame, color):
+    """Find a colored square target within the frame and return the enclosing contour"""
+    thresh = threshold_image(frame, color)
+    contour = find_square(thresh)
     return contour
 
 def direction(delta, eps=20):
@@ -127,63 +127,49 @@ def direction(delta, eps=20):
     else:
         return 0
     
+
+class TargetData:
+    def __init__(self, contour, dx, dy, distance, ratio):
+        self.contour = contour
+        self.dx = dx
+        self.dy = dy
+        self.distance = distance
+        self.ratio = ratio
     
 class TargetIdentifier:
     def __init__(self, color_outer, color_inner):
         self.color_outer = color_outer
         self.color_inner = color_inner
-        
-        self.contour_outer = None
-        self.contour_inner = None
-        self.frame = None
 
-    def find_contour(self, frame):
-        contour_outer = find_target(frame, self.color_outer)
-        contour_inner = find_target(frame, self.color_inner)
+    def find_target(self, frame):
+        contour_outer = find_square_contour(frame, self.color_outer)
+        contour_inner = find_square_contour(frame, self.color_inner)
         if (contour_outer is not None and
             contour_inner is not None and
             contained_within(contour_outer, contour_inner)):
-            self.contour_outer = contour_outer
-            self.contour_inner = contour_inner
-            self.frame = frame
-            return True
+            dx, dy = centroid_displacement(contour_outer, frame)
+            dist = distance(contour_outer)
+            ratio = vertical_line_ratio(contour_outer)
+            target_data = TargetData(contour_outer, dx, dy, dist, ratio)
+            self.draw(frame, target_data)
+            return target_data
         else:
-            self.contour_outer = None
-            self.contour_inner = None
-            self.frame = None
-            return False
+            return None
 
-    def displacement(self):
-        if self.contour_outer is not None:
-            return centroid_displacement(self.contour_outer, self.frame)
-
-    def distance(self):
-        if self.contour_outer is not None:
-            return distance(self.contour_outer)
-
-    def vertical_line_ratio(self):
-        if self.contour_outer is not None:
-            return vertical_line_ratio(self.contour_outer)
-
-    def draw(self):
-        if self.contour_outer is not None:
-            cv2.drawContours(self.frame, [self.contour_outer], -1, (0, 255, 0), 0)
-
-            dx, dy = self.displacement()
-            cv2.putText(self.frame, "dx: {:+4d}".format(dx), (10, 250),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1,
-                        (0, 255, 0), 1, cv2.LINE_AA)
-            cv2.putText(self.frame, "dy: {:+4d}".format(dy), (10, 300),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1,
-                        (0, 255, 0), 1, cv2.LINE_AA)
-            d = self.distance()
-            cv2.putText(self.frame, "dist: {:+4.2f}".format(d), (10, 350),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1,
-                        (0, 255, 0), 1, cv2.LINE_AA)
-            r = self.vertical_line_ratio()
-            cv2.putText(self.frame, "ratio: {:+1.3f}".format(r), (10, 400),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1,
-                        (0, 255, 0), 1, cv2.LINE_AA)
+    def draw(self, frame, target_data):
+        cv2.drawContours(frame, [target_data.contour], -1, (0, 255, 0), 0)
+        cv2.putText(frame, "dx: {:+4d}".format(target_data.dx), (10, 250),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1,
+                    (0, 255, 0), 1, cv2.LINE_AA)
+        cv2.putText(frame, "dy: {:+4d}".format(target_data.dy), (10, 300),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1,
+                    (0, 255, 0), 1, cv2.LINE_AA)
+        cv2.putText(frame, "dist: {:+4.2f}".format(target_data.distance), (10, 350),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1,
+                    (0, 255, 0), 1, cv2.LINE_AA)
+        cv2.putText(frame, "ratio: {:+1.3f}".format(target_data.ratio), (10, 400),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1,
+                    (0, 255, 0), 1, cv2.LINE_AA)
         
 
 class FindTarget:
