@@ -26,6 +26,10 @@ class Drone:
         self.thread_video.daemon = True
         self.thread_video.start()
 
+        self.thread_keep_alive = threading.Thread(target=self.keep_alive)
+        self.thread_keep_alive.daemon = True
+        self.thread_keep_alive.start()
+
         self.send('command')
         self.send('streamon')
 
@@ -39,7 +43,13 @@ class Drone:
 
         if exc_type is not None:
             print(exc_type, exc_value, traceback)
-        
+
+    def keep_alive(self):
+        """Send 'command' every 5 seconds to keep the drone from becoming inactive"""
+        while True:
+            time.sleep(5)
+            self.send('command')
+            
     def send(self, command):
         ip, port = self.address
         self.socket.sendto(command.encode('utf-8'), self.address)
