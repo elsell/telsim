@@ -4,7 +4,7 @@ import recognition
 
 dropped_frame_count = 10
 timeout = 10
-radius_centered = 20
+radius_centered = 50
 distance_min = 0.8
 distance_max = 1.0
 ratio_min = 0.95
@@ -72,8 +72,8 @@ class LookAt(State):
     def move(self, target):
         dx = target.dx
         dy = target.dy
-        yaw = 0 if dx == 0 else int(dx/abs(dx))*20
-        up_down = 0 if dy == 0 else int(dy/abs(dy))*20
+        yaw = 0 if dx == 0 else int(dx/abs(dx))*10
+        up_down = 0 if dy == 0 else int(dy/abs(dy))*10
         self.controller.set_yaw(yaw)
         self.controller.set_up_down(up_down)
         self.controller.send()
@@ -99,10 +99,11 @@ class FlyTo(State):
             return self
 
     def move(self, target):
+        value = 0
         if target.distance > distance_max:
-            value = 20
+            value = 10
         if target.distance < distance_min:
-            value = -20
+            value = -10
 
         self.controller.set_forward_backward(value)
         self.controller.send()
@@ -132,9 +133,9 @@ class Strafe(State):
     def move(self, target):
         value = 0
         if target.ratio < ratio_min:
-            value = 20
-        if target.ratio > ratio_max:
             value = -20
+        if target.ratio > ratio_max:
+            value = 20
 
         self.controller.set_left_right(value)
         self.controller.send()
