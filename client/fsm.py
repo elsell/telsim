@@ -2,6 +2,23 @@
 import time
 import recognition
 
+dropped_frame_count = 10
+timeout = 10
+radius_centered = 20
+distance_min = 0.8
+distance_max = 1.0
+ratio_min = 0.95
+ratio_max = 1.05
+
+def target_centered(dx, dy):
+    return dx**2 + dy**2 <= radius_centered**2
+
+def good_distance(distance):
+    return distance_min < distance < distance_max
+
+def good_left_right(ratio):
+    return ratio_min < ratio < ratio_max
+
 class State:
     def react(self, target):
         raise NotImplementedError("Override react in derived class")
@@ -16,11 +33,11 @@ class LookAround(State):
         self.move()
 
         self.start_time = time.monotonic()
-        print('LookAround:enter')
+        print('LookAround: enter')
 
     def react(self, target):
         elapsed_time = time.monotonic() - self.start_time
-        if elapsed_time > 5:
+        if elapsed_time > timeout:
             print('LookAround: timeout')
             self.controller.stop()
             return None
@@ -41,10 +58,11 @@ class LookAt(State):
     def __init__(self, identifier, controller):
         self.identifier = identifier
         self.controller = controller
+        self.controller.stop()
         print('LookAt: enter')
         
     def react(self, target):
-        if recognition.target_centered(target.dx, target.dy):
+        if target_centered(target.dx, target.dy):
             print('LookAt: target centered')
             return FlyTo(self.identifier, self.controller)
         else:
@@ -55,7 +73,7 @@ class LookAt(State):
         dx = target.dx
         dy = target.dy
         yaw = 0 if dx == 0 else int(dx/abs(dx))*20
-        up_down = 0 if dy == 0 else int(dy/abs(dy))*-20
+        up_down = 0 if dy == 0 else int(dy/abs(dy))*20
         self.controller.set_yaw(yaw)
         self.controller.set_up_down(up_down)
         self.controller.send()
@@ -66,25 +84,76 @@ class FlyTo(State):
     def __init__(self, identifier, controller):
         self.identifier = identifier
         self.controller = controller
+        self.controller.stop()
         print('FlyTo: enter')
 
     def react(self, target):
-        if not recognition.target_centered(target.dx, target.dy):
+        if not target_centered(target.dx, target.dy):
             print('FlyTo: target not centered')
             return LookAt(self.identifier, self.controller)
-        else: # target centered
-            return None
-                
+
+        if good_distance(target.distance):
+            return Strafe(self.identifier, self.controller)
+        else:
+            self.move(target)
+            return self
+
+    def move(self, target):
+        if target.distance > distance_max:
+            value = 20
+        if target.distance < distance_min:
+            value = -20
+
+        self.controller.set_forward_backward(value)
+        self.controller.send()
+        
+
+class Strafe(State):
+    """Move drone left/right to be in front of target"""
+    def __init__(self, identifier, controller):
+        self.identifier = identifier
+        self.controller = controller
+        self.controller.stop()
+        print('Strafe: enter')
+
+    def react(self, target):
+        if not target_centered(target.dx, target.dy):
+            print('Strafe: target not centered')
+            return LookAt(self.identifier, self.controller)
+        elif not good_distance(target.distance):
+            print('Strafe: target distance wrong')
+            return FlyTo(self.identifier, self.controller)
+        elif good_left_right(target.ratio):
+            return Aligned(self.identifier, self.controller)
+        else: # bad left/right
+            self.move(target)
+            return self
+
+    def move(self, target):
+        value = 0
+        if target.ratio < ratio_min:
+            value = 20
+        if target.ratio > ratio_max:
+            value = -20
+
+        self.controller.set_left_right(value)
+        self.controller.send()
+            
+            
+        
         
 class Aligned(State):
     """Check if drone is in position"""
     def __init__(self, identifier, controller):
         self.identifier = identifier
         self.controller = controller
+        self.controller.stop()
         print('Aligned:enter')
 
     def react(self, target):
-        if recognition.target_centered(target.dx, target.dy):
+        if (target_centered(target.dx, target.dy) and
+            good_distance(target.distance) and
+            good_left_right(target.ratio)):
             print('Aligned: successfully aligned')
             self.controller.stop()
             return None
@@ -93,23 +162,13 @@ class Aligned(State):
             return LookAt(self.identifier, self.controller)
     
         
-# class FlyTo(State):
-#     """Move drone towards or away from target based on distance"""
-#     def __init__(self, identifier, controller):
-#         self.identifier = identifier
-#         self.controller = controller
-#         print("FlyTo:enter")
-
-#     def react(self, target):
-        
-        
 class AlignmentFSM:
     def __init__(self, identifier, controller):
         self.identifier = identifier
         self.controller = controller
         self.state = LookAround(identifier, controller)
         self.no_target_frame_count = 0
-        self.no_target_frame_limit = 10
+        self.no_target_frame_limit = dropped_frame_count
 
     def on_frame(self, frame):
         # should wait multiple frames where no target is found in case
