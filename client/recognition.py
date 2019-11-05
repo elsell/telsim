@@ -82,7 +82,7 @@ def vertical_line_ratio(contour):
 def distance(contour):
     left, right = vertical_line_lengths(contour)
     avg = (left + right) / 2
-    factor = 88.7 # webcam
+    factor = 136.0 # target pixel factor for drone FOV
     return factor / avg # meters
 
 def centroid(contour):
