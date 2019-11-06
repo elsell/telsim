@@ -49,7 +49,7 @@ class LookAround(State):
             return self
 
     def move(self):
-        self.controller.set_yaw(20)
+        self.controller.set_yaw(40)
         self.controller.send()
 
     
