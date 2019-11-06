@@ -6,6 +6,9 @@ sys.path.append('.')
 import numpy as np
 import cv2
 import libh264decoder
+import controller
+import recognition
+import fsm
 
 class Drone:
     """Class for sending network commands to the Tello EDU drone"""
@@ -31,6 +34,7 @@ class Drone:
         self.thread_keep_alive.start()
 
         self.send('command')
+        self.stop()
         self.send('streamon')
 
     def __enter__(self):
@@ -113,6 +117,9 @@ class Drone:
     def emergency(self):
         self.send('emergency')
 
+    def stop(self):
+        self.rc(0, 0, 0, 0)
+
     def up(self, x):
         self.send('up {}'.format(int(x)))
 
@@ -144,6 +151,28 @@ class Drone:
     def rc(self, left_right, forward_backward, up_down, yaw):
         self.send_udp('rc {} {} {} {}'.format(int(left_right), int(forward_backward),
                                               int(up_down), int(yaw)))
+
+    def align_to_target(self):
+        """Align the drone to the first target seen"""
+        control = controller.DroneController(self)
+        color_outer = 'fuschia'
+        color_inner = 'blue'
+        identifier = recognition.TargetIdentifier(color_outer, color_inner)
+        aligner = fsm.AlignmentFSM(identifier, control)
+        while True:
+            frame = self.get_frame()
+            if aligner.on_frame(frame) is None:
+                # succeeded in alignment
+                break
+
+            cv2.imshow('drone camera', frame)
+
+            # type q to quit
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+        cv2.destroyAllWindows()
+
         
 class WebcamDrone:
     """Simulated drone for testing rc controls. Uses webcam for video stream."""
@@ -155,6 +184,17 @@ class WebcamDrone:
         self.capturing = True
 
         self.command_num = 0
+
+    def __enter__(self):
+        print('command')
+        return self
+        
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.land()
+    
+        if exc_type is not None:
+            print(exc_type, exc_value, traceback)
+
 
     def get_frame(self):
         while self.frame is None:
@@ -184,3 +224,24 @@ class WebcamDrone:
     def rc(self, a, b, c, d):
         self.command_num += 1
         print('{:4d}: rc | l/r {:4d} | f/b {:4d} | u/d {:4d} | yaw {:4d} |'.format(self.command_num, a, b, c, d))
+
+    def align_to_target(self):
+        """Align the drone to the first target seen"""
+        control = controller.DroneController(self)
+        color_outer = 'fuschia'
+        color_inner = 'blue'
+        identifier = recognition.TargetIdentifier(color_outer, color_inner)
+        aligner = fsm.AlignmentFSM(identifier, control)
+        while True:
+            frame = self.get_frame()
+            if aligner.on_frame(frame) is None:
+                # succeeded in alignment
+                break
+
+            cv2.imshow('drone camera', frame)
+
+            # type q to quit
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+        cv2.destroyAllWindows()
