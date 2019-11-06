@@ -82,7 +82,9 @@ def vertical_line_ratio(contour):
 def distance(contour):
     left, right = vertical_line_lengths(contour)
     avg = (left + right) / 2
-    factor = 136.0 # target pixel factor for drone FOV
+    # target pixel factor for drone FOV
+    # target is 15.25cm in height
+    factor = 136.0
     return factor / avg # meters
 
 def centroid(contour):
@@ -107,26 +109,11 @@ def centroid_displacement(contour, image):
     dy = cy - y # assume positive dy means move drone up
     return dx, dy
 
-def target_centered(dx, dy, radius=20):
-    """Determine if the target is centered within the given pixel
-radius"""
-    return dx**2 + dy**2 <= radius**2
-
 def find_square_contour(frame, color):
     """Find a colored square target within the frame and return the enclosing contour"""
     thresh = threshold_image(frame, color)
     contour = find_square(thresh)
     return contour
-
-def direction(delta, eps=20):
-    """Given a centroid displacement value, calculate the direction to move"""
-    magnitude = abs(delta)
-    if magnitude > eps:
-        direction = int(delta / magnitude)
-        return direction
-    else:
-        return 0
-    
 
 class TargetData:
     def __init__(self, contour, dx, dy, distance, ratio):
@@ -170,59 +157,4 @@ class TargetIdentifier:
         cv2.putText(frame, "ratio: {:+1.3f}".format(target_data.ratio), (10, 400),
                     cv2.FONT_HERSHEY_SIMPLEX, 1,
                     (0, 255, 0), 1, cv2.LINE_AA)
-        
 
-class FindTarget:
-    def __init__(self, controller, identifier):
-        self.controller = controller
-        self.identifier = identifier
-        self.no_target_frame_count = 0
-
-    def process(self, frame, draw=False):
-        if self.identifier.find_contour(frame):
-            # found target, so reset counter
-            self.no_target_frame_count = 0
-
-            # adjust drone to look at target
-            dx, dy = self.identifier.displacement()
-            yaw = direction(dx)
-            up_down = direction(dy)
-
-            # compute distance and move drone towards target
-            dist = self.identifier.distance()
-            if dist > 0.55: # meters
-                forward_backward = 1
-            elif dist < 0.45:
-                forward_backward = -1
-            else:
-                forward_backward = 0
-
-            # compute left-right based on ratio of sides of target
-            ratio = self.identifier.vertical_line_ratio()
-            if ratio < 0.95:
-                left_right = -1
-            elif ratio > 1.05:
-                left_right = 1
-            else:
-                left_right = 0
-                
-            # send drone directions
-            self.controller.set_left_right(left_right)
-            self.controller.set_forward_backward(forward_backward)
-            self.controller.set_yaw(yaw)
-            self.controller.set_up_down(up_down)
-            self.controller.send()
-
-            if draw:
-                # draw contours on frame
-                #cv2.line(frame, (cx, cy), (cx+dx, cy+dy), (0, 0, 255), 1)
-                contour = self.identifier.contour_outer
-                cv2.drawContours(frame, [contour], -1, (0, 255, 0), 0)
-                #cent = centroid(contour)
-                #cv2.circle(frame, cent, 3, (255, 255, 255), -1)
-
-        else:
-            self.no_target_frame_count += 1
-            if self.no_target_frame_count > 10:
-                self.controller.stop()
-                no_target_frame_count = 0
