@@ -22,6 +22,7 @@ while True:
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
+drone.land()
 cv2.destroyAllWindows()
 
 
