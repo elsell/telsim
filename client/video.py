@@ -4,6 +4,7 @@ import multiprocessing
 import socket
 import sys
 sys.path.append('.') # to find module libh264decoder
+import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import libh264decoder
