@@ -3,10 +3,14 @@ import threading
 import socket
 
 class NoNetwork:
+    def __init__(self):
+        self.command_history = []
+
     def close(self):
         pass
     
     def send(self, command):
+        self.command_history.append(command)
         print('Send: {}'.format(command))
 
     def recv(self):
@@ -28,6 +32,8 @@ class Network:
         self.thread_keep_alive.daemon = True
         self.thread_keep_alive.start()
 
+        self.command_history = []
+
     def close(self):
         self.socket.close()
 
@@ -42,6 +48,7 @@ class Network:
         ip, port = self.address
         self.socket.sendto(command.encode('utf-8'), self.address)
         print('Send: {}'.format(command))
+        self.command_history.append(command)
 
     def recv(self):
         """Wait for a response from socket"""
