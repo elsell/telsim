@@ -1,8 +1,9 @@
 from drone import Drone
 
-with Drone(which='webcam') as d:
+with Drone(which='planner') as d:
     d.battery()
     d.takeoff()
-    d.align_to_target()
 
-
+    for i in range(8):
+        d.go(0, 100, 10)
+        d.cw(135)

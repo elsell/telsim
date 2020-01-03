@@ -5,6 +5,7 @@ import numpy as np
 import cv2
 from network import Network, NoNetwork
 from video import Webcam, Video, VideoDisplayer
+import planner
 import controller
 import recognition
 import fsm
@@ -14,23 +15,30 @@ class Drone:
     """Class for interacting with a drone. You can choose which drone by
 setting the 'which' argument to:
 
-webcam: simulated drone using the webcam
-drone:  Tello EDU drone using the network
+planner: plots planned flight path of drone
+webcam:  simulated drone using the webcam
+drone:   Tello EDU drone using the network
 
     """
     def __init__(self, which='webcam'):
-        if which == 'webcam':
+        self.which = which
+        if which == 'planner':
+            self.network = self.video = planner.Planner()
+            self.displayer = None
+
+        elif which == 'webcam':
             self.network = NoNetwork()
             self.video = Webcam()
+            self.displayer = VideoDisplayer(self.video)
             
         elif which == 'drone':
             self.network = Network()
             self.video = Video()
+            self.displayer = VideoDisplayer(self.video)
             
         else:
             raise "Unrecognized option: {}".format(which)
-        
-        self.displayer = VideoDisplayer(self.video)
+
         self.stop()
         self.network.sendrecv('streamon')
 
@@ -105,6 +113,9 @@ drone:  Tello EDU drone using the network
 
     def align_to_target(self):
         """Align the drone to the first target seen"""
+        if self.which == 'planner':
+            return
+
         control = controller.DroneController(self)
         color_outer = 'fuschia'
         color_inner = 'blue'
@@ -127,5 +138,4 @@ drone:  Tello EDU drone using the network
 
         # resume fast running VideoDisplayer thread
         self.displayer.resume()
-
 
