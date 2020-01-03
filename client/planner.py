@@ -1,3 +1,4 @@
+"""Module that provides planning tools to predict the drone flight path"""
 import functools
 from numpy import array, pi, sin, cos, arctan2
 import matplotlib.pyplot as plt
@@ -6,6 +7,7 @@ from matplotlib import animation
 from matplotlib.patches import FancyArrowPatch
 
 def rotate(angle, x, y):
+    """Rotate the vector (x,y) by angle (radians)"""
     s = sin(angle)
     c = cos(angle)
     x2 = x * c - y * s
@@ -13,6 +15,7 @@ def rotate(angle, x, y):
     return x2, y2
 
 def update_path(func):
+    """Decorator for updating the Planner's path history"""
     @functools.wraps(func)
     def wrapper(self, *args, **kwargs):
         func(self, *args, **kwargs)
@@ -20,6 +23,8 @@ def update_path(func):
     return wrapper
 
 class Planner:
+    """Parses the commands that are sent to it, constructs a flight path,
+and then displays it"""
     def __init__(self):
         self.command_history = []
 
@@ -44,12 +49,15 @@ class Planner:
                                
 
     def close(self):
+        """Dummy interface for Network class"""
         pass
 
     def send(self, command):
+        """Adds command to the history"""
         self.command_history.append(command)
 
     def recv(self):
+        """Dummy interface for Network class"""
         pass
 
     def sendrecv(self, command):
@@ -57,14 +65,20 @@ class Planner:
         self.recv()
 
     def stop(self):
+        """Fakes interface for Video class, but actually computes the path and
+displays the results
+
+        """
         self.compute_path()
         self.display_path()
 
     def compute_path(self):
+        """Parse each of the commands in the history"""
         for command in self.command_history:
             self.parse_command(command)
 
     def parse_command(self, command):
+        """Parse each command by dispatching to the correct function"""
         command, *args = command.split()
         args = [int(arg) for arg in args]
         if command in self.commands:

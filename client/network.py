@@ -1,8 +1,10 @@
+"""Module to handle the lower-level networking"""
 import time
 import threading
 import socket
 
 class NoNetwork:
+    """Provides a dummy network object that prints the commands sent and received"""
     def __init__(self):
         self.command_history = []
 
@@ -22,6 +24,7 @@ class NoNetwork:
 
 
 class Network:
+    """Opens a socket connection to the drone"""
     def __init__(self, ip='192.168.10.1', port=8889):
         # socket settings for sending commands
         self.address = (ip, port)

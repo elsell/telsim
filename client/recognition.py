@@ -116,6 +116,13 @@ def find_square_contour(frame, color):
     return contour
 
 class TargetData:
+    """Stores the relevant target data
+contour : an opencv contour object
+dx : target displacement in width (pixels)
+dy : target displacement in height (pixels)
+distance : calculated distance to target (m)
+ratio : ratio of left- and right-vertical edges of target
+"""
     def __init__(self, contour, dx, dy, distance, ratio):
         self.contour = contour
         self.dx = dx
@@ -124,11 +131,17 @@ class TargetData:
         self.ratio = ratio
     
 class TargetIdentifier:
+    """Given colors for two concentric squares squares, method
+find_target() generates a TargetData object if a target is found in
+the video frame, otherwise None.
+
+    """
     def __init__(self, color_outer, color_inner):
         self.color_outer = color_outer
         self.color_inner = color_inner
 
     def find_target(self, frame):
+        """Find target in video frame and return TargetData, otherwise return None"""
         contour_outer = find_square_contour(frame, self.color_outer)
         contour_inner = find_square_contour(frame, self.color_inner)
         if (contour_outer is not None and
@@ -144,6 +157,7 @@ class TargetIdentifier:
             return None
 
     def draw(self, frame, target_data):
+        """Draw target data onto the video frame"""
         cv2.drawContours(frame, [target_data.contour], -1, (0, 255, 0), 0)
         cv2.putText(frame, "dx: {:+4d}".format(target_data.dx), (10, 250),
                     cv2.FONT_HERSHEY_SIMPLEX, 1,

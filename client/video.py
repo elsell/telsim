@@ -1,3 +1,4 @@
+"""Module for capturing and displaying video from the drone or a webcam"""
 import time
 import threading
 import multiprocessing

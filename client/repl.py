@@ -1,3 +1,4 @@
+"""A simple REPL for interacting with the drone"""
 from network import Network
 
 network = Network()
