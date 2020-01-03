@@ -1,10 +1,9 @@
 from drone import Drone
 
-with Drone() as d:
-    d.speed()
+with Drone(which='planner') as d:
     d.battery()
-    d.up(100)
-    d.forward(100)
-    d.back(100)
-    d.ccw(360)
-    
+    d.takeoff()
+
+    for i in range(8):
+        d.go(0, 100, 10)
+        d.cw(135)
