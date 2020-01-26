@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import socket
 import time
 import functools
@@ -240,5 +239,3 @@ you must call rc(0, 0, 0, 0) or stop().
 
         # resume fast running VideoDisplayer thread
         self.displayer.resume()
-
->>>>>>> master
