@@ -30,7 +30,7 @@ class Network:
         self.address = (ip, port)
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.bind(('', port))
-
+        
         self.thread_keep_alive = threading.Thread(target=self.keep_alive)
         self.thread_keep_alive.daemon = True
         self.thread_keep_alive.start()
@@ -63,4 +63,18 @@ class Network:
         self.send(command)
         self.recv()
 
+class Listener:
+    """Opens a socket connection to the drone solely for listening"""
+    def __init__(self, ip='192.168.10.1', port=8890):
+        # socket settings for sending commands
+        self.address = (ip, port)
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.socket.bind(('', port))
 
+    def close(self):
+        self.socket.close() 
+
+    def recv(self):
+        """Wait for a response from socket"""
+        response, _ = self.socket.recvfrom(1024)
+        return response 
