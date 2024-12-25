@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/elsell/telsim#readme",
   "devDependencies": {
-    "electron": "^6.0.5",
+    "electron": "^9.1.0",
     "ws": "^7.1.2"
   },
   "dependencies": {
